@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #001f3f; /* Navy */
+            --accent-color: #708090; /* Slate Grey */
+            --dark-color: #2a2a2a;
+            --gradient: linear-gradient(135deg, #001f3f, #708090);
+            --navy: #001f3f;
+            --light-grey: #d3d3d3;
+        }
+
+        body {
+            background: linear-gradient(rgba(20, 20, 20, 0.8), rgba(20, 20, 20, 0.8)),
+                        url("{{ url_for('static', filename='admin.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--light-grey);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            max-width: 400px;
+        }
+
+        .card {
+            width: 100%;
+            padding: 2rem;
+            background-color: rgba(0, 31, 63, 0.2); /* Navy with transparency */
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 20px rgba(112, 128, 144, 0.4); /* Slate Grey shadow */
+            border-radius: 1rem;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--light-grey);
+            text-shadow: 2px 2px 0px rgba(0, 31, 63, 0.3),
+                        4px 4px 0px rgba(112, 128, 144, 0.2);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--accent-color);
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-color: var(--light-grey);
+            color: white;
+            box-shadow: 0 0 10px rgba(112, 128, 144, 0.4);
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            border: none;
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #708090, #001f3f);
+            box-shadow: 0 0 15px rgba(112, 128, 144, 0.5);
+        }
+
+        .login-link {
+            margin-top: 1rem;
+            text-align: center;
+            color: white;
+        }
+
+        .login-link a {
+            color: var(--light-grey);
+            text-decoration: none;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(112, 128, 144, 0.3);
+        }
+
+        .login-link a:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(112, 128, 144, 0.5);
+        }
+
+        ::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1 class="text-center mb-4">Sign Up</h1>
+            <form action="/signup" method="POST">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>            
+            <div class="login-link">
+                Already have an account? <a href="/login" style="color: yellow;">Login here</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+""""""</div></div>
