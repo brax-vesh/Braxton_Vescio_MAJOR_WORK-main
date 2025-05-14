@@ -20,7 +20,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
+    # email = Column(String, unique=True, nullable=False)
     # wishlist = relationship('ToDo', back_populates='user')
 
 
@@ -34,6 +34,5 @@ class User(Base):
 #     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 #     user = relationship('User', back_populates='todos')
 
-# # Database setup using sqlite, creates database table
-# engine = create_engine('sqlite:///userdata.db')
-# Base.metadata.create_all(engine)
+engine = create_engine('sqlite:///user_info.db')
+Base.metadata.create_all(engine)

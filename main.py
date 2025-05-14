@@ -1,7 +1,8 @@
 from flask import Flask, render_template, session, flash, redirect, request, url_for
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-import requests
+from setup_db import User, Base  # Add Base to imports
+from werkzeug.security import check_password_hash, generate_password_hash
 # from setup_db import User, ToDo, Base 
 
 app = Flask(__name__)
@@ -10,7 +11,7 @@ app.secret_key = "sneaky"
 #I would replace this with a random key / string in production...
 
 # Connecting to the Database
-engine = create_engine('sqlite:///userdata.db')
+engine = create_engine('sqlite:///user_info.db')
 
 Session = sessionmaker(bind=engine)
 db_session = Session()
@@ -25,31 +26,47 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # Add logic to verify user credentials
-        # Example: user = db_session.query(User).filter_by(username=username).first()
-        # if user and user.check_password(password):
-        #     session['user_id'] = user.id
-        #     flash('Login successful!', 'success')
-        #     return redirect(url_for('home'))
-        flash('Invalid username or password', 'danger')
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        user = db_session.query(User).filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+            session["user_id"] = user.id
+            print("Login successful!", "info")
+            return redirect(('/dashboard'))
+        else:
+            print("Invalid username or password", "danger")
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # Add logic to create a new user
-        # Example: new_user = User(username=username)
-        # new_user.set_password(password)
-        # db_session.add(new_user)
-        # db_session.commit()
-        # flash('Account created successfully!', 'success')
-        # return redirect(url_for('login'))
-        flash('Signup failed. Try again.', 'danger')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Check if username already exists
+        existing_user = db_session.query(User).filter_by(username=username).first()
+        if (existing_user):
+            flash('Username already exists', 'danger')
+            return redirect('/signup')
+
+        # Validate password match
+        if password != confirm_password:
+            flash('Passwords do not match', 'danger')
+            return redirect('/signup')
+
+        # Create new user
+        hashed_password = generate_password_hash(password)
+        new_user = User(username=username, password=hashed_password)
+        db_session.add(new_user)
+        db_session.commit()
+
+        flash('Account created successfully! Please login.', 'success')
+        return redirect('/login')
+
     return render_template('signup.html')
 
 if __name__ == '__main__':
