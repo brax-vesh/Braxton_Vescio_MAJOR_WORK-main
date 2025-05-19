@@ -16,7 +16,7 @@ engine = create_engine('sqlite:///user_info.db')
 Session = sessionmaker(bind=engine)
 db_session = Session()
 
-# Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine) 
 
 # CODE FOR PAGES
 
@@ -35,7 +35,7 @@ def login():
         if user and check_password_hash(user.password, password):
             session["user_id"] = user.id
             print("Login successful!", "info")
-            return redirect(('/dashboard'))
+            return redirect('/homepage')
         else:
             print("Invalid username or password", "danger")
     return render_template('login.html')
@@ -66,8 +66,37 @@ def signup():
 
         flash('Account created successfully! Please login.', 'success')
         return redirect('/login')
-
+    
     return render_template('signup.html')
+    
+@app.route('/homepage')
+def homepage():
+    # Check if user is logged in
+    if "user_id" not in session:
+        flash("Please log in to access this page", "warning")
+        return redirect('/login')
+    
+    return render_template('homepage.html')
+
+@app.route('/recc_generator')
+def recc_generator():
+    # Check if user is logged in
+    if "user_id" not in session:
+        flash("Please log in to access this page", "warning")
+        return redirect('/login')
+    
+    # Add recommendation logic here
+    return render_template('recc_generator.html')
+
+@app.route('/wishlist')
+def wishlist():
+    # Check if user is logged in
+    if "user_id" not in session:
+        flash("Please log in to access this page", "warning")
+        return redirect('/login')
+    
+    # You might want to fetch wishlist items from database here
+    return render_template('wishlist.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True
