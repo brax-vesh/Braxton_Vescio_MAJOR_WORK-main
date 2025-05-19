@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game Recommendations</title>
+  <style>
+    select {
+      width: 400px;
+      height: 150px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Choose Your Game Preferences</h1>
+
+  <form method="POST" action="/recc_generator">
+    <label>Favourite Games:</label>
+    <select name="favourite_games" multiple>
+      {% for game in games %}
+        <option value="{{ game.id }}">{{ game.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Preferred Genres:</label>
+    <select name="genres" multiple>
+      {% for genre in genres %}
+        <option value="{{ genre.id }}">{{ genre.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Preferred Developers:</label>
+    <select name="devs" multiple>
+      {% for dev in developers %}
+        <option value="{{ dev.id }}">{{ dev.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Preferred Platforms:</label>
+    <select name="platform" multiple>
+      {% for p in platforms %}
+        <option value="{{ p.id }}">{{ p.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Ratings:</label>
+    <select name="rating" multiple>
+      {% for r in ratings %}
+        <option value="{{ r.id }}">{{ r.name }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">Get Recommendations</button>
+  </form>
+</body>
+</html>

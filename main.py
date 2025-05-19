@@ -3,12 +3,33 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from setup_db import User, Base  # Add Base to imports
 from werkzeug.security import check_password_hash, generate_password_hash
+import requests
 # from setup_db import User, ToDo, Base 
 
 app = Flask(__name__)
 
 app.secret_key = "sneaky"
-#I would replace this with a random key / string in production...
+# Replace with a proper random key for prod
+
+CLIENT_ID = ''
+CLIENT_SECRET = ''
+AUTH_TOKEN = None
+
+url = 'https://id.twitch.tv/oauth2/token'
+params = {
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
+    'grant_type': 'client_credentials'
+}
+
+response = requests.post(url, params=params)
+data = response.json()
+
+print("ACCESS TOKEN:", data['access_token'])
+
+# Save token globally so igdb_fetch can use it
+print("Response JSON:", data)
+AUTH_TOKEN = data['access_token']
 
 # Connecting to the Database
 engine = create_engine('sqlite:///user_info.db')
@@ -78,15 +99,64 @@ def homepage():
     
     return render_template('homepage.html')
 
-@app.route('/recc_generator')
+def igdb_fetch(endpoint):
+    url = f'https://api.igdb.com/v4/{endpoint}'
+    headers = {
+        'Client-ID': CLIENT_ID,
+        'Authorization': f'Bearer {AUTH_TOKEN}',
+    }
+    data = 'fields id,name; limit 50;'
+    response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code != 200:
+        print(f"⚠️ IGDB ERROR [{endpoint}]: {response.status_code} - {response.text}")
+        return []
+
+    return response.json()
+
+@app.route('/recc_generator', methods=['GET', 'POST'])
 def recc_generator():
-    # Check if user is logged in
     if "user_id" not in session:
         flash("Please log in to access this page", "warning")
         return redirect('/login')
-    
-    # Add recommendation logic here
-    return render_template('recc_generator.html')
+
+    # FETCH DATA FROM IGDB
+    genres = igdb_fetch('genres')
+    games = igdb_fetch('games')
+    developers = igdb_fetch('companies')
+    platforms = igdb_fetch('platforms')
+    age_ratings = igdb_fetch('age_ratings')  # Optional
+
+    # DEBUGGING OUTPUT
+    print("GENRES:", genres)
+    print("GAMES:", games)
+    print("DEVS:", developers)
+    print("PLATFORMS:", platforms)
+    print("RATINGS:", age_ratings)
+
+    if request.method == 'POST':
+        favourite_games = request.form.getlist('favourite_games')
+        preffered_genres = request.form.getlist('genres')
+        preffered_devs = request.form.getlist('devs')
+        platform = request.form.getlist('platform')
+        rating = request.form.getlist('rating')
+
+        # Future: put recommendation logic here
+
+        return render_template('recommendations.html',
+                               favourite_games=favourite_games,
+                               preffered_genres=preffered_genres,
+                               preffered_devs=preffered_devs,
+                               platform=platform,
+                               rating=rating)
+
+    return render_template('recc_generator.html',
+                           genres=genres,
+                           games=games,
+                           developers=developers,
+                           platforms=platforms,
+                           ratings=age_ratings)
+
 
 @app.route('/wishlist')
 def wishlist():
@@ -99,4 +169,4 @@ def wishlist():
     return render_template('wishlist.html')
 
 if __name__ == '__main__':
-    app.run(debug=True
+    app.run(debug=True)
