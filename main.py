@@ -4,12 +4,11 @@ from sqlalchemy import create_engine
 from setup_db import User, Base  # Add Base to imports
 from werkzeug.security import check_password_hash, generate_password_hash
 import requests
-# from setup_db import User, ToDo, Base 
+#from setup_db import User, ToDo, Base 
 
 app = Flask(__name__)
 
-app.secret_key = "sneaky"
-# Replace with a proper random key for prod
+app.secret_key = "mimicveil"
 
 CLIENT_ID = ''
 CLIENT_SECRET = ''
@@ -25,21 +24,16 @@ params = {
 response = requests.post(url, params=params)
 data = response.json()
 
-print("ACCESS TOKEN:", data['access_token'])
-
-# Save token globally so igdb_fetch can use it
-print("Response JSON:", data)
+#this saves my IGDB auth token globally once i get it.
 AUTH_TOKEN = data['access_token']
 
-# Connecting to the Database
+#connecting to the Database
 engine = create_engine('sqlite:///user_info.db')
 
 Session = sessionmaker(bind=engine)
 db_session = Session()
 
-# Base.metadata.create_all(engine) 
-
-# CODE FOR PAGES
+# Base.metadata.create_all(engine) (CREATES DATABASE EVERY TIME THE SERVER STARTS) 
 
 @app.route('/')
 def home():
@@ -68,18 +62,18 @@ def signup():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
-        # Check if username already exists
+        #check if username exists
         existing_user = db_session.query(User).filter_by(username=username).first()
         if (existing_user):
             flash('Username already exists', 'danger')
             return redirect('/signup')
 
-        # Validate password match
+        #check that passwords match
         if password != confirm_password:
             flash('Passwords do not match', 'danger')
             return redirect('/signup')
 
-        # Create new user
+        #create new user
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, password=hashed_password)
         db_session.add(new_user)
@@ -92,7 +86,7 @@ def signup():
     
 @app.route('/homepage')
 def homepage():
-    # Check if user is logged in
+    #check if user is logged in
     if "user_id" not in session:
         flash("Please log in to access this page", "warning")
         return redirect('/login')
@@ -120,14 +114,12 @@ def recc_generator():
         flash("Please log in to access this page", "warning")
         return redirect('/login')
 
-    # FETCH DATA FROM IGDB
     genres = igdb_fetch('genres')
     games = igdb_fetch('games')
     developers = igdb_fetch('companies')
     platforms = igdb_fetch('platforms')
-    age_ratings = igdb_fetch('age_ratings')  # Optional
+    age_ratings = igdb_fetch('age_ratings')  #optional not sure whether i'll leave it
 
-    # DEBUGGING OUTPUT
     print("GENRES:", genres)
     print("GAMES:", games)
     print("DEVS:", developers)
@@ -137,35 +129,40 @@ def recc_generator():
     if request.method == 'POST':
         favourite_games = request.form.getlist('favourite_games')
         preffered_genres = request.form.getlist('genres')
-        preffered_devs = request.form.getlist('devs')
-        platform = request.form.getlist('platform')
-        rating = request.form.getlist('rating')
+        key_words = request.form.getlist('keywords') #artstyle etc...
+        preffered_devs = request.form.getlist('devs') # optional
+        platform = request.form.getlist('platform') #optional
+        rating = request.form.getlist('rating') #optional
 
-        # Future: put recommendation logic here
+        #reccomendation logic will go here
 
-        return render_template('recommendations.html',
-                               favourite_games=favourite_games,
-                               preffered_genres=preffered_genres,
-                               preffered_devs=preffered_devs,
-                               platform=platform,
-                               rating=rating)
+        art_genre_recommended_games = []
+        similarity_reccomended_games = []
+
+        
+        return render_template('recommendations.html',                   
+            favourite_games=favourite_games,
+            preffered_genres=preffered_genres,
+            preffered_devs=preffered_devs,
+            platform=platform,
+            rating=rating)
 
     return render_template('recc_generator.html',
-                           genres=genres,
-                           games=games,
-                           developers=developers,
-                           platforms=platforms,
-                           ratings=age_ratings)
+        genres=genres,
+        games=games,
+        developers=developers,
+        platforms=platforms,
+        ratings=age_ratings)
 
 
 @app.route('/wishlist')
 def wishlist():
-    # Check if user is logged in
+    #check if user is logged in
     if "user_id" not in session:
         flash("Please log in to access this page", "warning")
         return redirect('/login')
     
-    # You might want to fetch wishlist items from database here
+    #will get wishlist items from database
     return render_template('wishlist.html')
 
 if __name__ == '__main__':
