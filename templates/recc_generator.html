@@ -1,355 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Game Recommendations</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('click', (e) => {
+                const searchInput = document.getElementById('game_search');
+                const resultsDiv = document.getElementById('search_results');
+                
+                if (e.target !== searchInput && !resultsDiv.contains(e.target)) {
+                    resultsDiv.innerHTML = '';
+                }
+            });
+        });
+    </script>
+    <meta charset="UTF-8">
+    <title>Game Recommender</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-        }
-        
-        .dropdown-container {
-            position: relative;
-            width: 100%;
-        }
-        
-        .dropdown-header {
-            padding: 10px;
+        #search_results {
             border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: white;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .dropdown-header:after {
-            content: '▼';
-            font-size: 12px;
-        }
-        
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            width: 100%;
-            max-height: 300px;
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #ccc;
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-            background-color: white;
-            z-index: 10;
+            position: absolute;
+            background: white;
+            width: 300px;
         }
-        
-        .dropdown-menu input {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .dropdown-item {
-            padding: 10px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .add-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 16px;
-            line-height: 24px;
-            text-align: center;
+        .result-item {
+            padding: 8px;
             cursor: pointer;
         }
-        
-        .selected-items {
-            margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        .selected-tag {
-            background-color: #e0e0e0;
-            padding: 5px 10px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .remove-btn {
-            margin-left: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #666;
-        }
-        
-        button[type="submit"] {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        
-        button[type="submit"]:hover {
-            background-color: #3367D6;
+        .result-item:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Choose Your Game Preferences</h1>
-        
-        <form method="POST" action="/recc_generator" id="recommendationForm">
-            <div class="form-group">
-                <label>Favourite Games:</label>
-                <div class="dropdown-container" id="games-dropdown">
-                    <div class="dropdown-header">Select Games</div>
-                    <div class="dropdown-menu">
-                        <input type="text" placeholder="Search games..." class="search-input">
-                        <div class="dropdown-items">
-                            {% for game in games %}
-                                <div class="dropdown-item" data-id="{{ game.id }}" data-name="{{ game.name }}">
-                                    {{ game.name }}
-                                    <span class="add-btn">+</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div class="selected-items" id="selected-games"></div>
-                <input type="hidden" name="favourite_games" id="favourite_games_input">
-            </div>
-            
-            <div class="form-group">
-                <label>Preferred Genres:</label>
-                <div class="dropdown-container" id="genres-dropdown">
-                    <div class="dropdown-header">Select Genres</div>
-                    <div class="dropdown-menu">
-                        <input type="text" placeholder="Search genres..." class="search-input">
-                        <div class="dropdown-items">
-                            {% for genre in genres %}
-                                <div class="dropdown-item" data-id="{{ genre.id }}" data-name="{{ genre.name }}">
-                                    {{ genre.name }}
-                                    <span class="add-btn">+</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div class="selected-items" id="selected-genres"></div>
-                <input type="hidden" name="genres" id="genres_input">
-            </div>
-            
-            <div class="form-group">
-                <label>Preferred Developers:</label>
-                <div class="dropdown-container" id="devs-dropdown">
-                    <div class="dropdown-header">Select Developers</div>
-                    <div class="dropdown-menu">
-                        <input type="text" placeholder="Search developers..." class="search-input">
-                        <div class="dropdown-items">
-                            {% for dev in developers %}
-                                <div class="dropdown-item" data-id="{{ dev.id }}" data-name="{{ dev.name }}">
-                                    {{ dev.name }}
-                                    <span class="add-btn">+</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div class="selected-items" id="selected-devs"></div>
-                <input type="hidden" name="devs" id="devs_input">
-            </div>
-            
-            <div class="form-group">
-                <label>Preferred Platforms:</label>
-                <div class="dropdown-container" id="platforms-dropdown">
-                    <div class="dropdown-header">Select Platforms</div>
-                    <div class="dropdown-menu">
-                        <input type="text" placeholder="Search platforms..." class="search-input">
-                        <div class="dropdown-items">
-                            {% for p in platforms %}
-                                <div class="dropdown-item" data-id="{{ p.id }}" data-name="{{ p.name }}">
-                                    {{ p.name }}
-                                    <span class="add-btn">+</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div class="selected-items" id="selected-platforms"></div>
-                <input type="hidden" name="platform" id="platform_input">
-            </div>
-            
-            <div class="form-group">
-                <label>Ratings:</label>
-                <div class="dropdown-container" id="ratings-dropdown">
-                    <div class="dropdown-header">Select Ratings</div>
-                    <div class="dropdown-menu">
-                        <input type="text" placeholder="Search ratings..." class="search-input">
-                        <div class="dropdown-items">
-                            {% for r in ratings %}
-                                <div class="dropdown-item" data-id="{{ r.id }}" data-name="{{ r.name }}">
-                                    {{ r.name }}
-                                    <span class="add-btn">+</span>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div class="selected-items" id="selected-ratings"></div>
-                <input type="hidden" name="rating" id="rating_input">
-            </div>
-            
-            <button type="submit">Get Recommendations</button>
-        </form>
-    </div>
+    <h2>Generate Game Recommendations</h2>
+
+    <form method="POST" action="/recc_generator">
+        <label for="game_search">Search Favourite Games:</label><br />
+        <input type="text" id="game_search" autocomplete="off" placeholder="Type a game name" />
+        <div id="search_results"></div>
+
+        <ul id="selected_games"></ul>
+        <input type="hidden" name="favourite_games" id="favourite_games_input" />
+
+        <br><br>
+        <button type="submit">Get Recommendations</button>
+    </form>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize all dropdowns
-            initDropdown('games-dropdown', 'selected-games', 'favourite_games_input');
-            initDropdown('genres-dropdown', 'selected-genres', 'genres_input');
-            initDropdown('devs-dropdown', 'selected-devs', 'devs_input');
-            initDropdown('platforms-dropdown', 'selected-platforms', 'platform_input');
-            initDropdown('ratings-dropdown', 'selected-ratings', 'rating_input');
-            
-            function initDropdown(dropdownId, selectedContainerId, hiddenInputId) {
-                const container = document.getElementById(dropdownId);
-                const header = container.querySelector('.dropdown-header');
-                const menu = container.querySelector('.dropdown-menu');
-                const searchInput = menu.querySelector('.search-input');
-                const items = menu.querySelectorAll('.dropdown-item');
-                const selectedContainer = document.getElementById(selectedContainerId);
-                const hiddenInput = document.getElementById(hiddenInputId);
-                const selectedItems = new Map();
-                
-                // Toggle dropdown menu
-                header.addEventListener('click', function() {
-                    const isOpen = menu.style.display === 'block';
-                    closeAllDropdowns();
-                    if (!isOpen) {
-                        menu.style.display = 'block';
-                        searchInput.focus();
-                    }
-                });
-                
-                // Search functionality
-                searchInput.addEventListener('input', function() {
-                    const query = this.value.toLowerCase();
-                    items.forEach(item => {
-                        const name = item.dataset.name.toLowerCase();
-                        item.style.display = name.includes(query) ? 'flex' : 'none';
-                    });
-                });
-                
-                // Add items
-                menu.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('add-btn') || e.target.parentElement.classList.contains('add-btn')) {
-                        const item = e.target.closest('.dropdown-item');
-                        const id = item.dataset.id;
-                        const name = item.dataset.name;
-                        
-                        if (!selectedItems.has(id)) {
-                            selectedItems.set(id, name);
-                            updateSelectedItems();
-                        }
-                    }
-                });
-                
-                // Update selected items display and hidden input
-                function updateSelectedItems() {
-                    selectedContainer.innerHTML = '';
-                    const ids = [];
-                    
-                    selectedItems.forEach((name, id) => {
-                        const tag = document.createElement('div');
-                        tag.className = 'selected-tag';
-                        tag.innerHTML = `${name} <span class="remove-btn" data-id="${id}">×</span>`;
-                        selectedContainer.appendChild(tag);
-                        ids.push(id);
-                    });
-                    
-                    hiddenInput.value = ids.join(',');
-                }
-                
-                // Remove selected items
-                selectedContainer.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('remove-btn')) {
-                        const id = e.target.dataset.id;
-                        selectedItems.delete(id);
-                        updateSelectedItems();
-                    }
-                });
+        const gameSearchInput = document.getElementById('game_search');
+        const resultsDiv = document.getElementById('search_results');
+        const selectedGamesUl = document.getElementById('selected_games');
+        const favouriteGamesInput = document.getElementById('favourite_games_input');
+
+        let selectedGames = [];
+
+        gameSearchInput.addEventListener('input', async () => {
+            const query = gameSearchInput.value.trim();
+            if (!query) {
+                resultsDiv.innerHTML = '';
+                return;
             }
-            
-            // Close all dropdowns when clicking outside
-            function closeAllDropdowns() {
-                document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                    menu.style.display = 'none';
-                });
-            }
-            
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown-container')) {
-                    closeAllDropdowns();
+            const res = await fetch(`/search_games?q=${encodeURIComponent(query)}`);
+            const games = await res.json();
+
+            resultsDiv.innerHTML = games.map(g => 
+                `<div class="result-item" data-id="${g.id}" data-name="${g.name}">${g.name}</div>`
+            ).join('');
+        });
+
+        resultsDiv.addEventListener('click', e => {
+            if (e.target.classList.contains('result-item')) {
+                const id = e.target.getAttribute('data-id');
+                const name = e.target.getAttribute('data-name');
+
+                if (!selectedGames.find(g => g.id === id)) {
+                    selectedGames.push({ id, name });
+                    updateSelectedGames();
                 }
-            });
-            
-            // Form submission
-            document.getElementById('recommendationForm').addEventListener('submit', function(e) {
-                // The hidden inputs already contain comma-separated IDs
-                // No need to do anything special for form submission
-            });
+                gameSearchInput.value = '';
+                resultsDiv.innerHTML = '';
+            }
+        });
+
+        function updateSelectedGames() {
+            selectedGamesUl.innerHTML = selectedGames.map(g => 
+                `<li>${g.name} <button type="button" data-id="${g.id}">Remove</button></li>`
+            ).join('');
+            favouriteGamesInput.value = selectedGames.map(g => g.id).join(',');
+        }
+
+        selectedGamesUl.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                const id = e.target.getAttribute('data-id');
+                selectedGames = selectedGames.filter(g => g.id !== id);
+                updateSelectedGames();
+            }
         });
     </script>
 </body>
-</html></div>
+</html>
