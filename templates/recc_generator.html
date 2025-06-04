@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.addEventListener('click', (e) => {
-                const searchInput = document.getElementById('game_search');
-                const resultsDiv = document.getElementById('search_results');
-                
-                if (e.target !== searchInput && !resultsDiv.contains(e.target)) {
-                    resultsDiv.innerHTML = '';
-                }
-            });
-        });
-    </script>
     <meta charset="UTF-8">
     <title>Game Recommender</title>
     <style>
@@ -31,18 +19,93 @@
         .result-item:hover {
             background-color: #f0f0f0;
         }
+        select {
+            width: 300px;
+            padding: 6px;
+            margin-bottom: 20px;
+        }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('click', (e) => {
+                const searchInput = document.getElementById('game_search');
+                const resultsDiv = document.getElementById('search_results');
+
+                if (e.target !== searchInput && !resultsDiv.contains(e.target)) {
+                    resultsDiv.innerHTML = '';
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <h2>Generate Game Recommendations</h2>
 
-    <form method="POST" action="/recc_generator">
+    <form method="POST" action="{{ url_for('recc_generator') }}">
+        <!-- Favourite Games Search -->
         <label for="game_search">Search Favourite Games:</label><br />
         <input type="text" id="game_search" autocomplete="off" placeholder="Type a game name" />
         <div id="search_results"></div>
-
         <ul id="selected_games"></ul>
         <input type="hidden" name="favourite_games" id="favourite_games_input" />
+
+        <!-- Genres -->
+        <label for="genres">Preferred Genres:</label><br>
+        <select name="genres" id="genres" multiple required>
+            {% for genre in genres %}
+                <option value="{{ genre['id'] }}">{{ genre['name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Keywords -->
+        <label for="keywords">Artstyle Keywords:</label><br>
+        <select name="keywords" id="keywords" multiple>
+            {% for keyword in keywords %}
+                <option value="{{ keyword['id'] }}">{{ keyword['name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Developers -->
+        <label for="devs">Preferred Developers:</label><br>
+        <select name="devs" id="devs" multiple>
+            {% for dev in developers %}
+                <option value="{{ dev['id'] }}">{{ dev['name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Platforms -->
+        <label for="platform">Platforms:</label><br>
+        <select name="platform" id="platform" multiple>
+            {% for plat in platforms %}
+                <option value="{{ plat['id'] }}">{{ plat['name'] }}</option>
+            {% endfor %}
+        </select>
+
+        
+        <label for="themes">Preferred Themes:</label><br>
+        <select name="themes" id="themes" multiple>
+            {% for theme in themes %}
+                <option value="{{ theme['id'] }}">{{ theme['name'] }}</option>
+            {% endfor %}
+        </select>
+        
+        <!-- Game Modes -->
+        <label for="game_modes">Game Modes:</label><br>
+        <select name="game_modes" id="game_modes" multiple>
+            {% for mode in game_modes %}
+                <option value="{{ mode['id'] }}">{{ mode['name'] }}</option>
+            {% endfor %}
+        </select>
+        
+        <!-- Player Perspectives -->
+        <label for="player_perspectives">Player Perspectives:</label><br>
+        <select name="player_perspectives" id="player_perspectives" multiple>
+            {% for perspective in player_perspectives %}
+                <option value="{{ perspective['id'] }}">{{ perspective['name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Age Ratings section removed as requested -->
 
         <br><br>
         <button type="submit">Get Recommendations</button>

@@ -1,9 +1,88 @@
-<h2>Your Selections</h2>
-<ul>
-  <li>Favourite Games: {{ favourite_games }}</li>
-  <li>Genres: {{ preffered_genres }}</li>
-  <li>Art Style: {{ preffered_artstyle }}</li>
-  <li>Developers: {{ preffered_devs }}</li>
-  <li>Platforms: {{ platform }}</li>
-  <li>Rating: {{ rating }}</li>
-</ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Game Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+        h2 {
+            margin-top: 40px;
+            color: #fff;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background: #222;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 0 8px rgba(0,0,0,0.6);
+        }
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 14px;
+            color: #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Personalised Game Recommendations</h1>
+
+    {% if similar_game_ids %}
+        <h2>Similar to Your Favourite Games</h2>
+        <div class="card-grid">
+            {% for game in similar_game_ids %}
+                {% if game.name and game.cover %}
+                <div class="card">
+                    <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+                    <div class="card-title">{{ game.name }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if top_genre_games %}
+        <h2>Top Games From Your Favourite Genres</h2>
+        <div class="card-grid">
+            {% for game in top_genre_games %}
+                {% if game.name and game.cover %}
+                <div class="card">
+                    <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+                    <div class="card-title">{{ game.name }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if recommended_games %}
+        <h2>Final Recommendations</h2>
+        <div class="card-grid">
+            {% for game in recommended_games %}
+                {% if game.name and game.cover %}
+                <div class="card">
+                    <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+                    <div class="card-title">{{ game.name }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>

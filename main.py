@@ -7,6 +7,8 @@ import requests
 from rapidfuzz import fuzz, process
 #from setup_db import User, ToDo, Base 
 
+# IGDB COMMUNICATION SETUP
+
 app = Flask(__name__)
 
 app.secret_key = "mimicveil"
@@ -25,16 +27,73 @@ params = {
 response = requests.post(url, params=params)
 data = response.json()
 
-#this saves my IGDB auth token globally once i get it.
+
 AUTH_TOKEN = data['access_token']
 
-#connecting to the Database
+
+
+
+# WEBSITE INITIATION
+
 engine = create_engine('sqlite:///user_info.db')
 
 Session = sessionmaker(bind=engine)
 db_session = Session()
 
-# Base.metadata.create_all(engine) (CREATES DATABASE EVERY TIME THE SERVER STARTS) 
+
+
+# IGDB COMMUNICATION FUNCTIONS:
+
+def igdb_query(query_string):
+    url = 'https://api.igdb.com/v4/games'
+    headers = {
+        'Client-ID': CLIENT_ID,
+        'Authorization': f'Bearer {AUTH_TOKEN}'
+    }
+
+    response = requests.post(url, headers=headers, data=query_string)
+
+    if response.status_code != 200:
+        print(f"IGDB query error: {response.status_code} - {response.text}")
+        return []
+
+    return response.json()
+
+def igdb_fetch(endpoint):
+    url = f'https://api.igdb.com/v4/{endpoint}'
+    headers = {
+        'Client-ID': CLIENT_ID,
+        'Authorization': f'Bearer {AUTH_TOKEN}'
+    }
+    body = 'fields id, name; limit 500;'
+
+    response = requests.post(url, headers=headers, data=body)
+    if response.status_code != 200:
+        print(f"IGDB fetch error for {endpoint}: {response.status_code} - {response.text}")
+        return []
+    return response.json()
+
+def fetch_game_details(game_ids):
+    if not game_ids:
+        return []
+    chunked = [game_ids[i:i + 50] for i in range(0, len(game_ids), 50)]
+    all_games = []
+    for chunk in chunked:
+        ids = ','.join(str(i) for i in chunk)
+        games = igdb_query(f'''
+            fields name, cover.url;
+            where id = ({ids});
+            limit 50;
+        ''')
+        all_games.extend(games)
+    return all_games
+
+
+
+
+
+# GAME DATA FETCH FUNCTIONS
+
 def fetch_games(query):
     url = 'https://api.igdb.com/v4/games'
     headers = {
@@ -50,7 +109,7 @@ def fetch_games(query):
 
     return response.json()
 
-# Fuzzy filter results
+# GAME NAME SEARCH FILTRATION
 def fuzzy_filter(games, user_input, threshold=60):
     user_input = user_input.lower()
     game_names = {game['name']: game['id'] for game in games if 'name' in game}
@@ -58,7 +117,9 @@ def fuzzy_filter(games, user_input, threshold=60):
     matches = process.extract(user_input, game_names.keys(), scorer=fuzz.partial_ratio, score_cutoff=threshold, limit=15)
     return [(match, game_names[match]) for match, score, _ in matches]
 
-# --- Routes ---
+
+
+# APP ROUTES
 
 @app.route('/')
 def home():
@@ -123,24 +184,124 @@ def recc_generator():
         flash("Please log in to access this page", "warning")
         return redirect('/login')
 
+    # Static data for the form
+    themes = igdb_fetch('themes')
+    game_modes = igdb_fetch('game_modes')
+    player_perspectives = igdb_fetch('player_perspectives')
+    genres = igdb_fetch('genres')
+    keywords_data = igdb_fetch('keywords')
+    developers = igdb_fetch('companies')
+    platforms = igdb_fetch('platforms')
+
     if request.method == 'POST':
         favourite_game_ids = request.form.get('favourite_games', '').split(',')
-        print("Selected Favourite Games:", favourite_game_ids)
-        # TODO: Add rec logic using these game IDs
+        preffered_genres = request.form.getlist('genres')
+        selected_keywords = request.form.getlist('keywords')
+        preffered_devs = request.form.getlist('devs')
+        platforms_selected = request.form.getlist('platform')
+        selected_themes = request.form.getlist('themes')
+        selected_modes = request.form.getlist('game_modes')
+        selected_perspectives = request.form.getlist('player_perspectives')
 
-        return render_template('recommendations.html', favourite_games=favourite_game_ids)
+        # Step 1: Find similar games to favourites
+        similar_game_ids = []
+        for game_id in favourite_game_ids:
+            if game_id.strip():
+                response = igdb_query(f'''
+                    fields similar_games;
+                    where id = {game_id};
+                ''')
+                if response and 'similar_games' in response[0]:
+                    similar_game_ids.extend(response[0]['similar_games'])
 
-    return render_template('recc_generator.html')
+        # Step 2: Best games by each preferred genre
+        top_genre_games = []
+        for genre_id in preffered_genres:
+            genre_games = igdb_query(f'''
+                fields id, name, aggregated_rating;
+                where genres = [{genre_id}]
+                & aggregated_rating >= 75;
+                sort aggregated_rating desc;
+                limit 10;
+            ''')
+            top_genre_games.extend([game['id'] for game in genre_games])
 
-@app.route('/wishlist')
-def wishlist():
-    if "user_id" not in session:
-        flash("Please log in to access this page", "warning")
-        return redirect('/login')
-    #Tfetch wishlist items from DB
-    return render_template('wishlist.html')
+        # Convert those IDs into full game objects with name and cover art
+        similar_game_details = fetch_game_details(similar_game_ids)
+        top_genre_game_details = fetch_game_details(top_genre_games)
 
-# --- Run app ---
+        # Step 3: Final filtered multi-query for recommendations
+        filters = []
+        if preffered_genres:
+            filters.append(f"genres = ({','.join(preffered_genres)})")
+        if selected_keywords:
+            filters.append(f"keywords = ({','.join(selected_keywords)})")
+        if platforms_selected:
+            filters.append(f"platforms = ({','.join(platforms_selected)})")
+        if selected_themes:
+            filters.append(f"themes = ({','.join(selected_themes)})")
+        if selected_modes:
+            filters.append(f"game_modes = ({','.join(selected_modes)})")
+        if selected_perspectives:
+            filters.append(f"player_perspectives = ({','.join(selected_perspectives)})")
+        filters.append("aggregated_rating >= 50")
+
+        final_query = f'''
+            fields name, aggregated_rating, genres, platforms, summary, cover.url;
+            where {" & ".join(filters)};
+            sort aggregated_rating desc;
+            limit 50;
+        '''
+        recommended_games = igdb_query(final_query)
+
+        return render_template('recommendations.html',
+                               favourite_games=favourite_game_ids,
+                               similar_games=similar_game_details,
+                               top_genre_games=top_genre_game_details,
+                               recommended_games=recommended_games)
+
+    return render_template('recc_generator.html',
+                           genres=genres,
+                           keywords=keywords_data,
+                           developers=developers,
+                           platforms=platforms,
+                           themes=themes,
+                           game_modes=game_modes,
+                           player_perspectives=player_perspectives)
+
+
+# def recommend_games(favourite_game_ids, preffered_genres, keywords, preffered_devs, platform, rating):
+#     url = 'https://api.igdb.com/v4/games'
+    
+#     headers = {
+#         'Client-ID': CLIENT_ID,
+#         'Authorization': f'Bearer {AUTH_TOKEN}',
+#     }
+
+#     filter_values = []
+
+#     #if favourite_game_ids:
+#         #for i in favourite_game_ids:
+
+#     if preffered_genres:
+#         genre_ids = ','.join(str(i) for i in preffered_genres)
+#         filter_values.append(f"genres = ({genre_ids})")
+
+#     if platform:
+#         platform_ids = ','.join(str(i) for i in platform)
+#         filter_values(f"platforms = ({platform_ids})")
+
+#     if keywords:
+#         keyword_ids = ','.join(str(k) for k in keywords)
+#         filter_values(f"keywords = ({keyword_ids})")
+
+#         #rating, platform, impact all searches (if selected)
+#         widesweep_search = []
+#         individual_genre_search = []
+#         individual_keyword_search = []
+
+#         recommendations_collated = []
+
 
 if __name__ == '__main__':
     app.run(debug=True)
