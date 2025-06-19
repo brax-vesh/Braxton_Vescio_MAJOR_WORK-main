@@ -193,8 +193,12 @@ def recc_generator():
     developers = igdb_fetch('companies')
     platforms = igdb_fetch('platforms')
 
+    recommended_games = []
+    similar_game_details = []
+    top_genre_game_details = []
+
     if request.method == 'POST':
-        favourite_game_ids = request.form.get('favourite_games', '').split(',')
+        favourite_game_ids = [id.strip() for id in request.form.get('favourite_games', '').split(',') if id.strip()]
         preffered_genres = request.form.getlist('genres')
         selected_keywords = request.form.getlist('keywords')
         preffered_devs = request.form.getlist('devs')
@@ -203,18 +207,29 @@ def recc_generator():
         selected_modes = request.form.getlist('game_modes')
         selected_perspectives = request.form.getlist('player_perspectives')
 
-        # Step 1: Find similar games to favourites
+        # Validation for required fields
+        if not favourite_game_ids or not preffered_genres:
+            flash("Please enter at least one favourite game and select at least one genre.", "danger")
+            return render_template('recc_generator.html',
+                                   genres=genres,
+                                   keywords=keywords_data,
+                                   developers=developers,
+                                   platforms=platforms,
+                                   themes=themes,
+                                   game_modes=game_modes,
+                                   player_perspectives=player_perspectives)
+
+        # Step 1: Similar games
         similar_game_ids = []
         for game_id in favourite_game_ids:
-            if game_id.strip():
-                response = igdb_query(f'''
-                    fields similar_games;
-                    where id = {game_id};
-                ''')
-                if response and 'similar_games' in response[0]:
-                    similar_game_ids.extend(response[0]['similar_games'])
+            response = igdb_query(f'''
+                fields similar_games;
+                where id = {game_id};
+            ''')
+            if response and 'similar_games' in response[0]:
+                similar_game_ids.extend(response[0]['similar_games'])
 
-        # Step 2: Best games by each preferred genre
+        # Step 2: Top games by genre
         top_genre_games = []
         for genre_id in preffered_genres:
             genre_games = igdb_query(f'''
@@ -222,20 +237,22 @@ def recc_generator():
                 where genres = [{genre_id}]
                 & aggregated_rating >= 75;
                 sort aggregated_rating desc;
-                limit 10;
+                limit 50;
             ''')
             top_genre_games.extend([game['id'] for game in genre_games])
 
-        # Convert those IDs into full game objects with name and cover art
+        # Step 3: Get game details
         similar_game_details = fetch_game_details(similar_game_ids)
         top_genre_game_details = fetch_game_details(top_genre_games)
 
-        # Step 3: Final filtered multi-query for recommendations
+        # Step 4: Final recommendations
         filters = []
         if preffered_genres:
             filters.append(f"genres = ({','.join(preffered_genres)})")
         if selected_keywords:
             filters.append(f"keywords = ({','.join(selected_keywords)})")
+        if preffered_devs:
+            filters.append(f"involved_companies.company = ({','.join(preffered_devs)})")
         if platforms_selected:
             filters.append(f"platforms = ({','.join(platforms_selected)})")
         if selected_themes:
@@ -268,7 +285,6 @@ def recc_generator():
                            themes=themes,
                            game_modes=game_modes,
                            player_perspectives=player_perspectives)
-
 
 # def recommend_games(favourite_game_ids, preffered_genres, keywords, preffered_devs, platform, rating):
 #     url = 'https://api.igdb.com/v4/games'
