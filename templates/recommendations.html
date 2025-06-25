@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your Game Recommendations</title>
+    <title>Recommended Games</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #111;
+            background-color: #111;
             color: #eee;
+            font-family: Arial, sans-serif;
             padding: 20px;
         }
         h2 {
@@ -16,73 +16,119 @@
         }
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
         .card {
-            background: #222;
-            border-radius: 8px;
-            padding: 10px;
+            background-color: #222;
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            box-shadow: 0 0 8px rgba(0,0,0,0.6);
         }
         .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 10px;
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
         }
-        .card-title {
-            font-size: 14px;
-            color: #eee;
+        .wishlist-btn {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #444;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .wishlist-btn:hover {
+            background-color: #666;
+        }
+        .wishlist-btn.added {
+            background-color: #28a745;
+            cursor: default;
         }
     </style>
 </head>
 <body>
-    <h1>Your Personalised Game Recommendations</h1>
 
-    {% if similar_game_ids %}
-        <h2>Similar to Your Favourite Games</h2>
-        <div class="card-grid">
-            {% for game in similar_game_ids %}
-                {% if game.name and game.cover %}
-                <div class="card">
-                    <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-                    <div class="card-title">{{ game.name }}</div>
-                </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %}
+<h1>Recommended Games</h1>
 
-    {% if top_genre_games %}
-        <h2>Top Games From Your Favourite Genres</h2>
-        <div class="card-grid">
-            {% for game in top_genre_games %}
-                {% if game.name and game.cover %}
-                <div class="card">
-                    <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-                    <div class="card-title">{{ game.name }}</div>
-                </div>
-                {% endif %}
-            {% endfor %}
+<h2>Similar to Your Favourites</h2>
+<div class="card-grid">
+    {% for game in similar_games %}
+        <div class="card">
+            {% if game.cover %}
+                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+            {% endif %}
+            <p>{{ game.name }}</p>
+            <form method="POST" action="{{ url_for('add_to_wishlist') }}" class="wishlist-form">
+                <input type="hidden" name="game_id" value="{{ game.id }}">
+                <button type="submit" class="wishlist-btn">Add to Wishlist</button>
+            </form>
         </div>
-    {% endif %}
+    {% endfor %}
+</div>
 
-    {% if recommended_games %}
-        <h2>Final Recommendations</h2>
-        <div class="card-grid">
-            {% for game in recommended_games %}
-                {% if game.name and game.cover %}
-                <div class="card">
-                    <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-                    <div class="card-title">{{ game.name }}</div>
-                </div>
-                {% endif %}
-            {% endfor %}
+<h2>Top Games From Your Selected Genres</h2>
+<div class="card-grid">
+    {% for game in top_genre_games %}
+        <div class="card">
+            {% if game.cover %}
+                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+            {% endif %}
+            <p>{{ game.name }}</p>
+            <form method="POST" action="{{ url_for('add_to_wishlist') }}" class="wishlist-form">
+                <input type="hidden" name="game_id" value="{{ game.id }}">
+                <button type="submit" class="wishlist-btn">Add to Wishlist</button>
+            </form>
         </div>
-    {% endif %}
+    {% endfor %}
+</div>
+
+<h2>Highly Rated Based on Your Filters</h2>
+<div class="card-grid">
+    {% for game in recommended_games %}
+        <div class="card">
+            {% if game.cover %}
+                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+            {% endif %}
+            <p>{{ game.name }}</p>
+            <form method="POST" action="{{ url_for('add_to_wishlist') }}" class="wishlist-form">
+                <input type="hidden" name="game_id" value="{{ game.id }}">
+                <button type="submit" class="wishlist-btn">Add to Wishlist</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- AJAX Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.wishlist-form').forEach(form => {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.ok) {
+                const button = form.querySelector('button');
+                button.textContent = "Added!";
+                button.disabled = true;
+                button.classList.add('added');
+            } else {
+                alert("Failed to add to wishlist.");
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>

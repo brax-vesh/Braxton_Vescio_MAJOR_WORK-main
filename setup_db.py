@@ -4,35 +4,26 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
 
-"""
-Represents user accounts in the database
-allows username and password storage for user
-includes password verification functionality
-
-id: key used for user identification
-username is a uniqe string that acts as the users account name
-password is a hashed string used for authentication
-todos: the users created todos
-"""
-
 class User(Base):
     __tablename__ = 'users'
+
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    # email = Column(String, unique=True, nullable=False)
-    # wishlist = relationship('ToDo', back_populates='user')
+
+    wishlist = relationship('WishlistItem', back_populates='user', cascade='all, delete-orphan')
 
 
-# class ToDo(Base):
-#     __tablename__ = 'todo'
-#     id = Column(Integer, primary_key=True)
-#     task = Column(String, nullable=False)
-#     category = Column(String, nullable=False)
-#     completed = Column(Boolean, default=False)
-#     due_date = Column(DateTime, nullable=True)
-#     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-#     user = relationship('User', back_populates='todos')
+class WishlistItem(Base):
+    __tablename__ = 'wishlist'
 
+    id = Column(Integer, primary_key=True)
+    game_id = Column(Integer, nullable=False)  # This is the external game ID (e.g. from IGDB)
+    
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user = relationship('User', back_populates='wishlist')
+
+
+# Create DB engine and tables
 engine = create_engine('sqlite:///user_info.db')
 Base.metadata.create_all(engine)
