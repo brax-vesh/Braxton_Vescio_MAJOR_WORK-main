@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <title>Game Recommender</title>
     <style>
+        /* --- Top buttons --- */
+        .top-nav {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .nav-btn {
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            background-color: #34a853;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
         #search_results {
             border: 1px solid #ccc;
             max-height: 200px;
@@ -25,32 +50,32 @@
             margin-bottom: 20px;
         }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.addEventListener('click', (e) => {
-                const searchInput = document.getElementById('game_search');
-                const resultsDiv = document.getElementById('search_results');
-
-                if (e.target !== searchInput && !resultsDiv.contains(e.target)) {
-                    resultsDiv.innerHTML = '';
-                }
-            });
-        });
-    </script>
 </head>
 <body>
+
+    <!-- Top Nav Buttons -->
+    <div class="top-nav">
+        <div class="top-nav">
+            <div class="top-nav">
+                <a href="/homepage" class="nav-btn">Homepage</a>
+                <a href="/logout" class="nav-btn">Logout</a>
+            </div>            
+</div>
+
+    </div>
+
     <h2>Generate Game Recommendations</h2>
 
     <form method="POST" action="{{ url_for('recc_generator') }}">
         <!-- Favourite Games Search -->
-        <label for="game_search">Search Favourite Games:</label><br />
+        <label for="game_search">Search Favourite Games: *</label><br />
         <input type="text" id="game_search" autocomplete="off" placeholder="Type a game name" />
         <div id="search_results"></div>
         <ul id="selected_games"></ul>
         <input type="hidden" name="favourite_games" id="favourite_games_input" />
 
         <!-- Genres -->
-        <label for="genres">Preferred Genres:</label><br>
+        <label for="genres">Preferred Genres: *</label><br>
         <select name="genres" id="genres" multiple required>
             {% for genre in genres %}
                 <option value="{{ genre['id'] }}">{{ genre['name'] }}</option>
@@ -81,23 +106,20 @@
             {% endfor %}
         </select>
 
-        
         <label for="themes">Preferred Themes:</label><br>
         <select name="themes" id="themes" multiple>
             {% for theme in themes %}
                 <option value="{{ theme['id'] }}">{{ theme['name'] }}</option>
             {% endfor %}
         </select>
-        
-        <!-- Game Modes -->
+
         <label for="game_modes">Game Modes:</label><br>
         <select name="game_modes" id="game_modes" multiple>
             {% for mode in game_modes %}
                 <option value="{{ mode['id'] }}">{{ mode['name'] }}</option>
             {% endfor %}
         </select>
-        
-        <!-- Player Perspectives -->
+
         <label for="player_perspectives">Player Perspectives:</label><br>
         <select name="player_perspectives" id="player_perspectives" multiple>
             {% for perspective in player_perspectives %}
@@ -105,12 +127,11 @@
             {% endfor %}
         </select>
 
-        <!-- Age Ratings section removed as requested -->
-
         <br><br>
         <button type="submit">Get Recommendations</button>
     </form>
 
+    <!-- Your JS below remains unchanged -->
     <script>
         const gameSearchInput = document.getElementById('game_search');
         const resultsDiv = document.getElementById('search_results');
@@ -128,7 +149,7 @@
             const res = await fetch(`/search_games?q=${encodeURIComponent(query)}`);
             const games = await res.json();
 
-            resultsDiv.innerHTML = games.map(g => 
+            resultsDiv.innerHTML = games.map(g =>
                 `<div class="result-item" data-id="${g.id}" data-name="${g.name}">${g.name}</div>`
             ).join('');
         });
@@ -148,7 +169,7 @@
         });
 
         function updateSelectedGames() {
-            selectedGamesUl.innerHTML = selectedGames.map(g => 
+            selectedGamesUl.innerHTML = selectedGames.map(g =>
                 `<li>${g.name} <button type="button" data-id="${g.id}">Remove</button></li>`
             ).join('');
             favouriteGamesInput.value = selectedGames.map(g => g.id).join(',');

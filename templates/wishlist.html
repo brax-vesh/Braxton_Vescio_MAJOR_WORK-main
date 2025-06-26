@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Wishlist</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+        }
+        h1 {
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #222;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .wishlist-item img {
+            width: 120px;
+            height: auto;
+            border-radius: 6px;
+            margin-right: 20px;
+        }
+        .wishlist-name {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Your Wishlist</h1>
+
+{% if games %}
+    {% for game in games %}
+        <div class="wishlist-item">
+            {% if game.cover %}
+                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+            {% endif %}
+            <div class="wishlist-name">{{ game.name }}</div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>You haven't added any games to your wishlist yet.</p>
+{% endif %}
+
+</body>
+</html>

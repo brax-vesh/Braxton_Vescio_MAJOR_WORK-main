@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ game.name }}</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            text-align: center;
+        }
+        img {
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            padding: 10px 20px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background-color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ game.name }}</h1>
+    {% if game.cover %}
+        <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+    {% endif %}
+    <p>{{ game.summary or "No summary available for this game." }}</p>
+
+    <br><br>
+    <a href="{{ url_for('recommendations') }}" class="back-btn">← Back to Recommendations</a>
+</body>
+</html

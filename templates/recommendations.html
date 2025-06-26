@@ -1,134 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Recommended Games</title>
-    <style>
-        body {
-            background-color: #111;
-            color: #eee;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        h2 {
-            margin-top: 40px;
-            color: #fff;
-        }
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .card {
-            background-color: #222;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .card img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 6px;
-        }
-        .wishlist-btn {
-            margin-top: 10px;
-            padding: 8px 12px;
-            background-color: #444;
-            border: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .wishlist-btn:hover {
-            background-color: #666;
-        }
-        .wishlist-btn.added {
-            background-color: #28a745;
-            cursor: default;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Game Recommendations</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .game-card {
+      background: #222;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+      max-width: 400px;
+    }
+    .game-card img {
+      max-width: 100%;
+      border-radius: 5px;
+    }
+    .wishlist-btn {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 3px;
+      color: white;
+      cursor: pointer;
+    }
+    .wishlist-btn:disabled {
+      background-color: #555;
+      cursor: default;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Recommended Games</h1>
+  <h1>Your Game Recommendations</h1>
 
-<h2>Similar to Your Favourites</h2>
-<div class="card-grid">
-    {% for game in similar_games %}
-        <div class="card">
-            {% if game.cover %}
-                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-            {% endif %}
-            <p>{{ game.name }}</p>
-            <form method="POST" action="{{ url_for('add_to_wishlist') }}" class="wishlist-form">
-                <input type="hidden" name="game_id" value="{{ game.id }}">
-                <button type="submit" class="wishlist-btn">Add to Wishlist</button>
-            </form>
-        </div>
-    {% endfor %}
-</div>
+  <!-- Assuming you have a backend template variable "games" -->
+  {% for game in games %}
+    <div class="game-card">
+      <img src="https:{{ game.cover.url }}" alt="{{ game.name }} cover" />
+      <h3>{{ game.name }}</h3>
+      <p>{{ game.summary }}</p>
+      <button class="wishlist-btn" data-game-id="{{ game.id }}">Add to Wishlist</button>
+    </div>
+  {% endfor %}
 
-<h2>Top Games From Your Selected Genres</h2>
-<div class="card-grid">
-    {% for game in top_genre_games %}
-        <div class="card">
-            {% if game.cover %}
-                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-            {% endif %}
-            <p>{{ game.name }}</p>
-            <form method="POST" action="{{ url_for('add_to_wishlist') }}" class="wishlist-form">
-                <input type="hidden" name="game_id" value="{{ game.id }}">
-                <button type="submit" class="wishlist-btn">Add to Wishlist</button>
-            </form>
-        </div>
-    {% endfor %}
-</div>
+  <script>
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+      button.addEventListener('click', e => {
+        const btn = e.currentTarget;
+        const gameId = btn.getAttribute('data-game-id');
 
-<h2>Highly Rated Based on Your Filters</h2>
-<div class="card-grid">
-    {% for game in recommended_games %}
-        <div class="card">
-            {% if game.cover %}
-                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-            {% endif %}
-            <p>{{ game.name }}</p>
-            <form method="POST" action="{{ url_for('add_to_wishlist') }}" class="wishlist-form">
-                <input type="hidden" name="game_id" value="{{ game.id }}">
-                <button type="submit" class="wishlist-btn">Add to Wishlist</button>
-            </form>
-        </div>
-    {% endfor %}
-</div>
-
-<!-- AJAX Script -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.wishlist-form').forEach(form => {
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(form);
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            if (response.ok) {
-                const button = form.querySelector('button');
-                button.textContent = "Added!";
-                button.disabled = true;
-                button.classList.add('added');
-            } else {
-                alert("Failed to add to wishlist.");
-            }
-        });
+        fetch('/add_to_wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: `game_id=${encodeURIComponent(gameId)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success' || data.status === 'already in wishlist') {
+            btn.textContent = 'Added!';
+            btn.disabled = true;
+          } else if (data.error) {
+            alert('Error: ' + data.error);
+          }
+        })
+        .catch(() => alert('Something went wrong.'));
+      });
     });
-});
-</script>
+  </script>
 
 </body>
 </html>

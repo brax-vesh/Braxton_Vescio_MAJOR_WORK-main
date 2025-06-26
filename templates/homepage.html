@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Game Lighthouse</title>
     <style>
         body {
@@ -13,7 +13,29 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            position: relative;
         }
+        /* Logout button fixed top-left */
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            background-color: #34a853;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .logout-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
         .container {
             text-align: center;
             padding: 2rem;
@@ -53,6 +75,8 @@
     </style>
 </head>
 <body>
+    <a href="/logout" class="logout-btn">Logout</a>
+
     <div class="container">
         <h1>Welcome to Game Lighthouse</h1>
         <div class="button-container">
