@@ -10,6 +10,22 @@
       font-family: Arial, sans-serif;
       padding: 20px;
     }
+    .top-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .top-nav button {
+      padding: 8px 15px;
+      background-color: #444;
+      border: none;
+      border-radius: 3px;
+      color: white;
+      cursor: pointer;
+    }
+    .top-nav button:hover {
+      background-color: #666;
+    }
     .game-card {
       background: #222;
       border-radius: 5px;
@@ -38,9 +54,16 @@
 </head>
 <body>
 
+  <!-- Navigation Buttons -->
+  <div class="top-nav">
+    <button onclick="location.href='/homepage'">Homepage</button>
+    <button onclick="location.href='/recc_generator'">Generator</button>
+    <button onclick="location.href='/wishlist'">Wishlist</button>
+    <button onclick="location.href='/logout'">Logout</button>
+  </div>
+
   <h1>Your Game Recommendations</h1>
 
-  <!-- Assuming you have a backend template variable "games" -->
   {% for game in games %}
     <div class="game-card">
       <img src="https:{{ game.cover.url }}" alt="{{ game.name }} cover" />

@@ -8,6 +8,9 @@ from rapidfuzz import fuzz, process
 #from setup_db import User, ToDo, Base 
 # IGDB COMMUNICATION SETUP
 
+
+
+
 app = Flask(__name__)
 
 app.secret_key = "mimicveil"
@@ -33,6 +36,9 @@ AUTH_TOKEN = data['access_token']
 
 
 # WEBSITE INITIATION
+
+
+
 
 engine = create_engine('sqlite:///user_info.db')
 

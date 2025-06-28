@@ -14,6 +14,23 @@
             color: #fff;
             margin-bottom: 30px;
         }
+        .top-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .top-nav button {
+            background-color: #333;
+            color: #eee;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .top-nav button:hover {
+            background-color: #555;
+        }
         .wishlist-item {
             display: flex;
             align-items: center;
@@ -34,6 +51,11 @@
     </style>
 </head>
 <body>
+
+<div class="top-nav">
+    <button onclick="location.href='/homepage'">Homepage</button>
+    <button onclick="location.href='/logout'">Logout</button>
+</div>
 
 <h1>Your Wishlist</h1>
 
