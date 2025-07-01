@@ -10,15 +10,18 @@
             font-family: Arial, sans-serif;
             padding: 30px;
         }
+
         h1 {
             color: #fff;
             margin-bottom: 30px;
         }
+
         .top-nav {
             display: flex;
             gap: 10px;
             margin-bottom: 30px;
         }
+
         .top-nav button {
             background-color: #333;
             color: #eee;
@@ -28,25 +31,50 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
+
         .top-nav button:hover {
             background-color: #555;
         }
+
         .wishlist-item {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            justify-content: space-between;
             background-color: #222;
             padding: 15px;
             border-radius: 10px;
+            margin-bottom: 20px;
         }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+        }
+
         .wishlist-item img {
             width: 120px;
             height: auto;
             border-radius: 6px;
             margin-right: 20px;
         }
+
         .wishlist-name {
             font-size: 18px;
+        }
+
+        .remove-btn {
+            background-color: #c62828;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .remove-btn:hover {
+            background-color: #b71c1c;
         }
     </style>
 </head>
@@ -62,10 +90,16 @@
 {% if games %}
     {% for game in games %}
         <div class="wishlist-item">
-            {% if game.cover %}
-                <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
-            {% endif %}
-            <div class="wishlist-name">{{ game.name }}</div>
+            <div class="item-info">
+                {% if game.cover %}
+                    <img src="{{ game.cover.url | replace('t_thumb', 't_cover_big') }}" alt="{{ game.name }}">
+                {% endif %}
+                <div class="wishlist-name">{{ game.name }}</div>
+            </div>
+            <form action="{{ url_for('remove_from_wishlist') }}" method="post">
+                <input type="hidden" name="game_id" value="{{ game.id }}">
+                <button class="remove-btn" type="submit">Remove</button>
+            </form>
         </div>
     {% endfor %}
 {% else %}

@@ -7,6 +7,8 @@ import requests
 from rapidfuzz import fuzz, process
 from functools import wraps
 from flask import make_response
+from flask import session, redirect, url_for
+
 #from setup_db import User, ToDo, Base 
 # IGDB COMMUNICATION SETUP
 
@@ -285,6 +287,30 @@ def game_titlepage(game_id):
 
     game = game_data[0]
     return render_template('game_titlepage.html', game=game)
+
+@app.route('/remove_from_wishlist', methods=['POST'])
+def remove_from_wishlist():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    game_id = request.form.get("game_id")
+    if not game_id:
+        return "Missing game ID", 400
+
+    user = db_session.query(User).filter_by(id=user_id).first()
+    if not user:
+        return redirect(url_for("login"))
+
+    # Find the wishlist entry matching user and game
+    wishlist_entry = db_session.query(WishlistItem).filter_by(user_id=user.id, game_id=game_id).first()
+    if not wishlist_entry:
+        return "Game not in wishlist", 404
+
+    db_session.delete(wishlist_entry)
+    db_session.commit()
+
+    return redirect(url_for("wishlist"))
 
 #__RECCOMENDATION ALGORITHMS__
 
