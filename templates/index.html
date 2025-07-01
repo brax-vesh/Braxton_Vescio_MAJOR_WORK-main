@@ -1,379 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"="width=device-width, initial-scale=1.0">
-    <title>StudentHub - Your Academic Organization Platform</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #800000;
-            --accent-color: #ff4040;
-            --dark-color: #000000;
-            --gradient: linear-gradient(135deg, #800000, #ff4040);
-            --metallic: #707070;
-            --blood-orange: #ff4800;
-            --blood-red: #b30000;
-            --text-gradient: linear-gradient(to bottom, #ff4800, #b30000);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Lighthouse</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #f1f1f1;
+      background-color: #0b0c10;
+    }
 
-        body {
-            font-family: 'Share Tech Mono', monospace;
-            overflow-x: hidden;
-            background-color: black;
-            color: var(--blood-orange);
-        }
+    .navbar {
+      background-color: rgba(0, 0, 0, 0.85);
+      border-bottom: 2px solid #00acee;
+    }
 
-        h1, h2, h3, h4, h5, .navbar-brand {
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 0px rgba(255, 72, 0, 0.3),
-                         4px 4px 0px rgba(179, 0, 0, 0.2);
-            background: var(--text-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #00acee;
+    }
 
-        .display-4 {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            -webkit-text-stroke: 2px var(--blood-red);
-        }
+    .navbar .btn-outline-light {
+      color: #ccc;
+      border-color: #555;
+    }
 
-        .lead {
-            font-family: 'Share Tech Mono', monospace;
-            letter-spacing: 2px;
-            text-shadow: 0 0 5px rgba(255, 64, 64, 0.5);
-            color: var(--blood-orange);
-        }
+    .navbar .btn-outline-light:hover {
+      background-color: #00acee;
+      color: #000;
+    }
 
-        .gradient-text {
-            background: linear-gradient(45deg, #ff4800, #ff0066);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: none;
-        }
+    .btn-glow {
+      background-color: #00acee;
+      color: #000;
+      font-weight: bold;
+      padding: 0.8rem 2rem;
+      border-radius: 30px;
+      border: none;
+      transition: all 0.3s ease;
+    }
 
-        .card-title {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            background: var(--text-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .btn-glow:hover {
+      box-shadow: 0 0 15px #00aceeaa;
+      transform: translateY(-2px);
+    }
 
-        .stat-number {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            letter-spacing: 4px;
-            -webkit-text-stroke: 2px #E6B8FF;
-            text-shadow: 0 0 10px rgba(230, 184, 255, 0.5),
-                         0 0 20px rgba(230, 184, 255, 0.45),
-                         0 0 30px rgba(230, 184, 255, 0.4),
-                         0 0 40px rgba(230, 184, 255, 0.35),
-                         0 0 50px rgba(230, 184, 255, 0.3),
-                         0 0 60px rgba(230, 184, 255, 0.25);
-        }
+    .hero-section {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: url("{{ url_for('static', filename='gamewall.png') }}") no-repeat center center fixed;
+      background-size: cover;
+    }
 
-        .navbar-brand {
-            font-size: 2rem;
-            letter-spacing: 3px;
-        }
+    .hero-section::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1;
+    }
 
-        .hero-section {
-            min-height: 100vh;
-            background: linear-gradient(
-                to bottom,
-                transparent 0%,
-                rgba(0, 0, 0, 0.7) 70%,
-                black 100%
-            ), url("{{ url_for('static', filename='violence_layer_skybox.png') }}");
-            background-size: cover;
-            background-position: center top;
-            position: relative;
-            overflow: hidden;
-        }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      text-align: center;
+      padding: 2rem;
+      /* Animate fade-in */
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+      animation-delay: 0.3s;
+    }
+    .hero-content p {
+      animation-delay: 0.7s;
+    }
+    .hero-content a.btn-glow {
+      animation-delay: 1.1s;
+    }
 
-        /* Remove or comment out the ::before pseudo-element since we're using an image */
-        /* .hero-section::before { ... } */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        /* Keep the existing ::after pseudo-element for the bottom diagonal transition */
-        .hero-section::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 150px;
-            background: linear-gradient(to bottom right, transparent 49%, black 51%);
-        }
+    .features-section {
+      background-color: #111;
+      padding: 5rem 2rem 3rem 2rem;
+    }
 
-        .navbar {
-            background-color: rgba(0, 0, 0, 0.8);
-            border-bottom: 2px solid var(--accent-color);
-        }
+    .feature-card {
+      background-color: #1a1a1a;
+      border: 1px solid #00acee44;
+      padding: 2rem;
+      border-radius: 12px;
+      color: #fff;
+      text-align: left;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
 
-        .feature-card {
-            background-color: rgba(128, 0, 0, 0.2);
-            border: 1px solid var(--accent-color);
-            box-shadow: 0 0 10px rgba(255, 64, 64, 0.2);
-        }
+    .feature-card h3 {
+      color: #00acee;
+    }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(255, 64, 64, 0.4);
-        }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 18px rgba(0, 172, 238, 0.3);
+    }
 
-        .feature-icon {
-            color: var(--blood-orange);
-        }
+    /* Carousel container */
+    .carousel-container {
+      margin-top: 3rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      overflow: hidden;
+      position: relative;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,172,238,0.4);
+      background-color: #1a1a1a;
+      padding: 1rem;
+    }
 
-        .btn-primary {
-            background: var(--gradient);
-            border: none;
-            text-shadow: 0 0 5px rgba(255, 64, 64, 0.5);
-        }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #ff4040, #800000);
-            box-shadow: 0 0 15px rgba(255, 64, 64, 0.5);
-        }
+    .carousel-item {
+      min-width: 250px;
+      margin-right: 1rem;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      color: #00acee;
+      box-shadow: 0 0 10px #00acee88;
+      user-select: none;
+      flex-shrink: 0;
+    }
 
-        .stats-section {
-            background-color: black;
-            border-top: 2px solid var(--accent-color);
-            border-bottom: 2px solid var(--accent-color);
-            color: white;
-        }
+    .carousel-item img {
+      width: 100%;
+      display: block;
+      border-bottom: 2px solid #00acee;
+    }
 
-        .stats-section p {
-            color: white !important;
-            text-shadow: 0 0 5px rgba(230, 184, 255, 0.45),
-                         0 0 10px rgba(230, 184, 255, 0.4),
-                         0 0 15px rgba(230, 184, 255, 0.35);
-        }
+    .carousel-item h5 {
+      padding: 0.5rem 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-align: center;
+    }
 
-        footer {
-            background-color: black !important;
-            border-top: 2px solid var(--accent-color);
-        }
+    /* Carousel controls */
+    .carousel-control {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0,0,0,0.7);
+      border: none;
+      color: #00acee;
+      font-size: 2rem;
+      padding: 0.3rem 0.8rem;
+      cursor: pointer;
+      border-radius: 5px;
+      user-select: none;
+      z-index: 10;
+      transition: background-color 0.3s ease;
+    }
+    .carousel-control:hover {
+      background-color: #00acee;
+      color: #000;
+    }
+    .carousel-control.prev {
+      left: 5px;
+    }
+    .carousel-control.next {
+      right: 5px;
+    }
 
-        .btn-light, .btn-outline-light {
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 2px solid white;
-            color: white;
-            text-transform: uppercase;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-        }
+    footer {
+      background-color: #0b0c10;
+      text-align: center;
+      padding: 2rem 0;
+      color: #6c757d;
+      border-top: 2px solid #00acee33;
+    }
 
-        .btn-light:hover, .btn-outline-light:hover {
-            background-color: rgba(255, 72, 0, 0.2);
-            border-color: var(--blood-orange);
-            color: var(--blood-orange);
-            box-shadow: 0 0 15px rgba(255, 72, 0, 0.3);
-        }
-
-        .navbar-brand img {
-            height: 40px;
-            width: auto;
-            filter: drop-shadow(0 0 5px rgba(255, 64, 64, 0.3));
-        }
-
-        p {
-            color: var(--blood-orange);
-            text-shadow: 1px 1px 2px rgba(179, 0, 0, 0.3);
-        }
-
-        .footer-logo {
-            height: 30px;
-            width: auto;
-            filter: drop-shadow(0 0 5px rgba(255, 72, 0, 0.3));
-        }
-
-        .ultra-highlight {
-            color: #ff3333; /* Brighter red */
-            font-weight: 900;
-            text-shadow: 0 0 5px rgba(255, 51, 51, 0.7),
-                         0 0 10px rgba(255, 51, 51, 0.5),
-                         0 0 15px rgba(255, 51, 51, 0.3);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 5px rgba(255, 51, 51, 0.7),
-                            0 0 10px rgba(255, 51, 51, 0.5),
-                            0 0 15px rgba(255, 51, 51, 0.3);
-            }
-            to {
-                text-shadow: 0 0 10px rgba(255, 51, 51, 0.9),
-                            0 0 20px rgba(255, 51, 51, 0.7),
-                            0 0 30px rgba(255, 51, 51, 0.5);
-            }
-        }
-
-        .feature-list {
-            margin-left: 0;
-            padding-left: 0;
-            list-style: none;
-        }
-
-        .feature-list li {
-            margin: 12px 0;
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .feature-list li:before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: var(--blood-orange);
-        }
-
-        .highlight-word {
-            color: var(--blood-orange);
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        .shimmer-text {
-            background: linear-gradient(
-                90deg,
-                #ff4800 0%,
-                #ff0066 25%,
-                #ff4800 50%,
-                #ff0066 75%,
-                #ff4800 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 3s linear infinite;
-            text-shadow: none;
-            font-weight: bold;
-        }
-
-        @keyframes shimmer {
-            to {
-                background-position: 200% center;
-            }
-        }
-    </style>
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .carousel-item {
+        min-width: 200px;
+      }
+      .hero-content h1 {
+        font-size: 2.4rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="StudentHub">
-            </a>
-            <div class="ms-auto">
-                <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">LOGIN</a>
-                <a href="{{ url_for('signup') }}" class="btn btn-light">REGISTER</a>
-            </div>
-        </div>
-    </nav>
 
-    <section class="hero-section d-flex align-items-center">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6" data-aos="fade-right">
-                    <h1 class="display-5 fw-bold mb-4"><span class="ultra-highlight">ULTRA</span>-Organize Your Busy Life</h1>
-                    <div class="lead mb-4 shimmer-text">
-                        With <span class="ultra-highlight">ULTRALIST</span>, you'll be able to <span class="highlight-word">EASILY</span> categorize all your tasks, personal or school related.
-                    </div>
-                    <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg">REGISTER</a>
-                </div>
-                <div class="col-lg-6" data-aos="fade-left">
-                    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="StudentHub Logo" class="img-fluid">
-                </div>
-            </div>
-        </div>
-    </section>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand" href="#">Game Lighthouse</a>
+      <div class="d-flex align-items-center gap-2">
+        <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-glow">Register</a>
+      </div>
+    </div>
+  </nav>
 
-    <section class="py-5">
-        <div class="container">
-            <div class="text-center mb-5" data-aos="fade-up">
-                <h2 class="display-4 mb-4">WHY CHOOSE US</h2>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center">
-                            <div class="feature-icon">
-                                <img src="{{ url_for('static', filename='neverforget.png') }}" alt="Never Forget" class="img-fluid mb-3" style="max-height: 80px;">
-                            </div>
-                            <h5 class="card-title">NEVER FORGET ABOUT ASSESSMENTS</h5>
-                            <p class="card-text">Never miss a <span class="ultra-highlight">DEADLINE</span>, with our countdown system</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center">
-                            <div class="feature-icon">
-                                <img src="{{ url_for('static', filename='study.png') }}" alt="Study Sessions" class="img-fluid mb-3" style="max-height: 80px;">
-                            </div>
-                            <h5 class="card-title">ALWAYS HAVE STUDY SESSIONS</h5>
-                            <p class="card-text"><span class="ultra-highlight">ULTRA</span>-Optimize your study time by motivating yourself to study with <span class="ultra-highlight">DEADLINES</span></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center">
-                            <div class="feature-icon">
-                                <img src="{{ url_for('static', filename='time.png') }}" alt="Time Management" class="img-fluid mb-3" style="max-height: 80px;">
-                            </div>
-                            <h5 class="card-title">MAKE TIME FOR CO-CURRICULAR ACTIVITIES</h5>
-                            <p class="card-text">Balance academics and extracurriculars and <span class="ultra-highlight">KILL IT</span> at school with ease.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Find Your Next Obsession</h1>
+      <p>Discover games you'll actually play—Game Lighthouse uses Twitch’s IGDB API to match you with quality picks tailored to your style.</p>
+      <a href="{{ url_for('signup') }}" class="btn btn-glow">Start Exploring</a>
+    </div>
+  </section>
 
-    <section class="stats-section py-5">
-        <div class="container">
-            <div class="row text-center justify-content-around align-items-center">
-                <div class="col-md-3" data-aos="fade-up">
-                    <div class="stat-number display-4" style="color: rgba(230, 184, 255, 0.6);">99999+</div>
-                    <p class="mt-2" style="color: rgba(230, 184, 255, 0.6);"> USERS ON OUR SITE</p>
-                </div>
-                <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
-                    <div class="stat-number display-4" style="color: rgba(230, 184, 255, 0.6);">99999+</div>
-                    <p class="mt-2" style="color: rgba(230, 184, 255, 0.6);">SUCCESSFULLY EXECUTED TASKS</p>
-                </div>
-                <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
-                    <div class="stat-number display-4" style="color: rgba(230, 184, 255, 0.6);">100%</div>
-                    <p class="mt-2" style="color: rgba(230, 184, 255, 0.6);">SATISFACTION</p>
-                </div>
-            </div>
+  <section class="features-section">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <h3>Algorithmic Picks</h3>
+            <p>Our system filters the junk and serves recommendations based on genre, popularity, and aggregated player ratings.</p>
+          </div>
         </div>
-    </section>
-
-    <footer class="bg-black text-light py-4">
-        <div class="container text-center">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="footer-logo">
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <h3>Wishlist Everything</h3>
+            <p>Click to Wishlist anything you like. Revisit, research, or buy later—whatever fits your game loop.</p>
+          </div>
         </div>
-    </footer>
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <h3>Game Details Coming Soon</h3>
+            <p>Soon, click any cover for a full breakdown: trailers, reviews, platform support, and summary data.</p>
+          </div>
+        </div>
+      </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script>
-        AOS.init({
-            duration: 800,
-            once: true
-        });
-    </script>
+      <!-- Carousel -->
+      <div class="carousel-container mt-5">
+        <button class="carousel-control prev" aria-label="Previous">&lt;</button>
+        <div class="carousel-track">
+          <div class="carousel-item">
+            <img src="{{ url_for('static', filename='game1.jpg') }}" alt="Game 1" />
+            <h5>Game Title 1</h5>
+          </div>
+          <div class="carousel-item">
+            <img src="{{ url_for('static', filename='game2.jpg') }}" alt="Game 2" />
+            <h5>Game Title 2</h5>
+          </div>
+          <div class="carousel-item">
+            <img src="{{ url_for('static', filename='game3.jpg') }}" alt="Game 3" />
+            <h5>Game Title 3</h5>
+          </div>
+          <div class="carousel-item">
+            <img src="{{ url_for('static', filename='game4.jpg') }}" alt="Game 4" />
+            <h5>Game Title 4</h5>
+          </div>
+          <!-- Add more carousel items as needed -->
+        </div>
+        <button class="carousel-control next" aria-label="Next">&gt;</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    &copy; {{ current_year }} Game Lighthouse — Built with Flask, Bootstrap, and a gamer’s soul 🎮
+  </footer>
+
+  <script>
+    // Carousel logic
+    const track = document.querySelector('.carousel-track');
+    const prevBtn = document.querySelector('.carousel-control.prev');
+    const nextBtn = document.querySelector('.carousel-control.next');
+    let position = 0;
+
+    // Width of one item + margin (margin-right: 1rem = 16px)
+    const itemWidth = 250 + 16; // px
+
+    prevBtn.addEventListener('click', () => {
+      position += itemWidth;
+      if (position > 0) {
+        position = -(track.scrollWidth - track.clientWidth);
+      }
+      track.style.transform = `translateX(${position}px)`;
+    });
+
+    nextBtn.addEventListener('click', () => {
+      position -= itemWidth;
+      if (Math.abs(position) > track.scrollWidth - track.clientWidth) {
+        position = 0;
+      }
+      track.style.transform = `translateX(${position}px)`;
+    });
+  </script>
 </body>
 </html>

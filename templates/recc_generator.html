@@ -2,136 +2,231 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Game Recommender</title>
+    <title>Game Lighthouse – Recommendations</title>
     <style>
-        /* --- Top buttons --- */
-        .top-nav {
-            position: fixed;
-            top: 20px;
-            left: 20px;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1b1f23;
+            color: #e6e6e6;
+        }
+
+        /* --- Navigation --- */
+        .top-bar {
+            background: #121417;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #2a2f34;
+        }
+
+        .nav-buttons {
             display: flex;
             gap: 10px;
-            z-index: 1000;
         }
+
         .nav-btn {
-            padding: 8px 14px;
+            padding: 8px 16px;
             font-size: 0.9rem;
             border: none;
-            border-radius: 5px;
-            text-decoration: none;
+            border-radius: 4px;
             background-color: #34a853;
             color: white;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-        .nav-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+            text-decoration: none;
+            transition: all 0.3s ease;
         }
 
+        .nav-btn:hover {
+            background-color: #2e9147;
+            transform: translateY(-1px);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 1.8rem;
+        }
+
+        form {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #252a2f;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+
+        label {
+            display: block;
+            margin: 16px 0 6px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            background: #1f2428;
+            color: white;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            background-color: #1f2428;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #34a853;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #2e9147;
+        }
+
+        /* --- Game search --- */
         #search_results {
-            border: 1px solid #ccc;
+            border: 1px solid #333;
             max-height: 200px;
             overflow-y: auto;
+            background: #2a2f34;
+            border-radius: 6px;
+            width: 100%;
+            margin-top: 4px;
             position: absolute;
-            background: white;
-            width: 300px;
+            z-index: 10;
         }
+
         .result-item {
-            padding: 8px;
+            padding: 10px;
+            cursor: pointer;
+            color: #ddd;
+        }
+
+        .result-item:hover {
+            background-color: #383d43;
+        }
+
+        #selected_games {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        #selected_games li {
+            margin-bottom: 5px;
+            list-style: disc;
+        }
+
+        #selected_games button {
+            margin-left: 10px;
+            padding: 4px 8px;
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            border-radius: 4px;
             cursor: pointer;
         }
-        .result-item:hover {
-            background-color: #f0f0f0;
-        }
-        select {
-            width: 300px;
-            padding: 6px;
-            margin-bottom: 20px;
+
+        #selected_games button:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Nav Buttons -->
-    <div class="top-nav">
-        <div class="top-nav">
-            <div class="top-nav">
-                <a href="/homepage" class="nav-btn">Homepage</a>
-                <a href="/logout" class="nav-btn">Logout</a>
-            </div>            
-</div>
-
+    <div class="top-bar">
+        <div style="font-weight: bold; font-size: 1.1rem;">🎮 Game Lighthouse</div>
+        <div class="nav-buttons">
+            <a href="/homepage" class="nav-btn">Homepage</a>
+            <a href="/logout" class="nav-btn">Logout</a>
+        </div>
     </div>
 
-    <h2>Generate Game Recommendations</h2>
+    <h2>Find Your Next Favourite Game</h2>
 
     <form method="POST" action="{{ url_for('recc_generator') }}">
-        <!-- Favourite Games Search -->
-        <label for="game_search">Search Favourite Games: *</label><br />
-        <input type="text" id="game_search" autocomplete="off" placeholder="Type a game name" />
+        <label for="game_search">Search Favourite Games: *</label>
+        <input type="text" id="game_search" autocomplete="off" placeholder="Type a game name..." />
         <div id="search_results"></div>
         <ul id="selected_games"></ul>
         <input type="hidden" name="favourite_games" id="favourite_games_input" />
 
-        <!-- Genres -->
-        <label for="genres">Preferred Genres: *</label><br>
+        <label for="genres">Preferred Genres: *</label>
         <select name="genres" id="genres" multiple required>
             {% for genre in genres %}
                 <option value="{{ genre['id'] }}">{{ genre['name'] }}</option>
             {% endfor %}
         </select>
 
-        <!-- Keywords -->
-        <label for="keywords">Artstyle Keywords:</label><br>
+        <label for="keywords">Artstyle Keywords:</label>
         <select name="keywords" id="keywords" multiple>
             {% for keyword in keywords %}
                 <option value="{{ keyword['id'] }}">{{ keyword['name'] }}</option>
             {% endfor %}
         </select>
 
-        <!-- Developers -->
-        <label for="devs">Preferred Developers:</label><br>
+        <label for="devs">Preferred Developers:</label>
         <select name="devs" id="devs" multiple>
             {% for dev in developers %}
                 <option value="{{ dev['id'] }}">{{ dev['name'] }}</option>
             {% endfor %}
         </select>
 
-        <!-- Platforms -->
-        <label for="platform">Platforms:</label><br>
+        <label for="platform">Platforms:</label>
         <select name="platform" id="platform" multiple>
             {% for plat in platforms %}
                 <option value="{{ plat['id'] }}">{{ plat['name'] }}</option>
             {% endfor %}
         </select>
 
-        <label for="themes">Preferred Themes:</label><br>
+        <label for="themes">Preferred Themes:</label>
         <select name="themes" id="themes" multiple>
             {% for theme in themes %}
                 <option value="{{ theme['id'] }}">{{ theme['name'] }}</option>
             {% endfor %}
         </select>
 
-        <label for="game_modes">Game Modes:</label><br>
+        <label for="game_modes">Game Modes:</label>
         <select name="game_modes" id="game_modes" multiple>
             {% for mode in game_modes %}
                 <option value="{{ mode['id'] }}">{{ mode['name'] }}</option>
             {% endfor %}
         </select>
 
-        <label for="player_perspectives">Player Perspectives:</label><br>
+        <label for="player_perspectives">Player Perspectives:</label>
         <select name="player_perspectives" id="player_perspectives" multiple>
             {% for perspective in player_perspectives %}
                 <option value="{{ perspective['id'] }}">{{ perspective['name'] }}</option>
             {% endfor %}
         </select>
 
-        <br><br>
         <button type="submit">Get Recommendations</button>
     </form>
 
-    <!-- Your JS below remains unchanged -->
     <script>
         const gameSearchInput = document.getElementById('game_search');
         const resultsDiv = document.getElementById('search_results');
