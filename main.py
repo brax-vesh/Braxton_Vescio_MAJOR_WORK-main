@@ -5,6 +5,8 @@ from setup_db import User, WishlistItem, Base, engine
 from werkzeug.security import check_password_hash, generate_password_hash
 import requests
 from rapidfuzz import fuzz, process
+from functools import wraps
+from flask import make_response
 #from setup_db import User, ToDo, Base 
 # IGDB COMMUNICATION SETUP
 
@@ -138,6 +140,16 @@ def fuzzy_filter(games, user_input, threshold=60):
 
 # APP ROUTES
 
+def nocache(view):
+    @wraps(view)
+    def no_cache_view(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, private, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    return no_cache_view
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -197,11 +209,13 @@ def signup():
 
 
 @app.route('/homepage')
+@nocache
 def homepage():
     if "user_id" not in session:
         flash("Please log in to access this page", "warning")
         return redirect('/login')
     return render_template('homepage.html')
+
 
 @app.route('/search_games')
 def search_games_api():
@@ -243,6 +257,7 @@ def add_to_wishlist():
 
 
 @app.route('/wishlist')
+@nocache
 def wishlist():
     if 'user_id' not in session:
         flash("Please log in to view your wishlist.", "warning")
@@ -278,6 +293,7 @@ def game_titlepage(game_id):
 
 
 @app.route('/recommendations')
+@nocache
 def recommendations():
     if 'recommended_game_ids' not in session:
         flash("No recommendations to display. Please generate them first.", "warning")
@@ -295,6 +311,7 @@ def recommendations():
 
 
 @app.route('/recc_generator', methods=['GET', 'POST'])
+@nocache
 def recc_generator():
     if "user_id" not in session:
         flash("Please log in to access this page", "warning")
